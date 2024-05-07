@@ -6,10 +6,11 @@ EXPOSE 22 80 443 1180 11443
 # Packages are listed in alphabetical order, for ease of readability and ease of maintenance.
 RUN     apk update \
     &&  apk add apache2-utils bash bind-tools busybox-extras bonding curl \
-                dropbear ethtool freeradius git go ifupdown-ng iperf3 iproute2 iputils \
-                jq lftp mtr mysql-client net-tools netcat-openbsd nginx nmap \
-                openssh-client openssl perl-net-telnet postgresql-client procps \
-                rsync socat sudo tcpdump tcptraceroute tshark wget \
+                dnsmasq dropbear ethtool freeradius git go ifupdown-ng iperf iperf3 \
+                iproute2 iputils jq lftp mtr mysql-client net-tools netcat-openbsd \
+                nginx nmap openntpd openssh-client openssl perl-net-telnet \
+                postgresql-client procps rsync socat sudo tcpdump tcptraceroute \
+                tshark wget \
     &&  mkdir /certs /docker \
     &&  chmod 700 /certs \
     &&  openssl req \

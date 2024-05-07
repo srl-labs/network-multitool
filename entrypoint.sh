@@ -1,3 +1,4 @@
+ifup -a
 #########
 # create directories for ssh host keys
 mkdir -p /etc/dropbear
