@@ -22,6 +22,8 @@ RUN mkdir -p /usr/local/gobgp
 RUN tar -C /usr/local/gobgp -xzf gobgp_3.25.0_linux_amd64.tar.gz
 RUN cp /usr/local/gobgp/gobgp* /usr/bin/
 
+RUN rm /etc/motd
+
 ENV GOROOT /usr/lib/go
 ENV GOPATH /go
 
