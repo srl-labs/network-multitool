@@ -30,4 +30,4 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           push: true
-          tags: ghcr.io/srl-labs/network-multitool:dev
+          tags: ghcr.io/srl-labs/network-multitool:latest
