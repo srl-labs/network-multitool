@@ -36,6 +36,10 @@ RUN echo 'user:multit00l' | chpasswd
 COPY index.html /usr/share/nginx/html/
 COPY nginx.conf /etc/nginx/nginx.conf
 
+# copy a basic but nicer than standard bashrc for the user
+COPY .bashrc /home/user/.bashrc
+COPY .bashrc /root/.bashrc
+
 COPY entrypoint.sh /docker/entrypoint.sh
 
 # Start nginx in foreground (pass CMD to docker entrypoint.sh):
