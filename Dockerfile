@@ -26,19 +26,26 @@ RUN rm /etc/motd
 
 ###
 # set a password to SSH into the docker container with
-RUN adduser -D -h /home/user user
+RUN adduser -D -h /home/user -s /bin/bash user
 RUN adduser user wheel
-RUN sed -i 's/# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/g' /etc/sudoers
+RUN sed -i 's/# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) NOPASSWD: ALL/g' /etc/sudoers
 RUN echo 'user:multit00l' | chpasswd
-#RUN echo 'root:alpine' | chpasswd
+# copy a basic but nicer than standard bashrc for the user
+COPY .bashrc /home/user/.bashrc
+RUN chown user:user /home/user/.bashrc
+# Ensure .bashrc is sourced by creating a .bash_profile that sources .bashrc
+RUN echo 'if [ -f ~/.bashrc ]; then . ~/.bashrc; fi' > /home/user/.bash_profile
+
+# Change ownership of the home directory to the user
+RUN chown -R user:user /home/user
 ###
 
 COPY index.html /usr/share/nginx/html/
 COPY nginx.conf /etc/nginx/nginx.conf
 
-# copy a basic but nicer than standard bashrc for the user
-COPY .bashrc /home/user/.bashrc
+# copy the bashrc file to the root user's home directory
 COPY .bashrc /root/.bashrc
+RUN echo 'if [ -f ~/.bashrc ]; then . ~/.bashrc; fi' > /root/.bash_profile
 
 COPY entrypoint.sh /docker/entrypoint.sh
 
