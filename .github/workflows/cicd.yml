@@ -28,6 +28,7 @@ jobs:
           tags: |
             type=ref,event=tag
             type=ref,event=branch
+            type=ref,event=pr
             # git short commit
             type=sha
 
