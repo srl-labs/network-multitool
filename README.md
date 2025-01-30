@@ -4,6 +4,6 @@ This container image is often used in containerlabs to emulate a client. The ima
 
 To connect to this image users can use
 
-* `ssh user@<name>`. Passoword `multit00l`.
+* `ssh user@<name>`. Password `multit00l`.
 * or `docker exec -i -t <name> bash`
 
