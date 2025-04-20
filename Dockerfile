@@ -1,6 +1,6 @@
 FROM alpine:3.18.6
 
-EXPOSE 22 80 443 1180 11443
+EXPOSE 22 80 443 1180 11443 8080
 
 # Install some tools in the container and generate self-signed SSL certificates.
 # Packages are listed in alphabetical order, for ease of readability and ease of maintenance.
@@ -47,22 +47,22 @@ COPY nginx.conf /etc/nginx/nginx.conf
 COPY .bashrc /root/.bashrc
 RUN echo 'if [ -f ~/.bashrc ]; then . ~/.bashrc; fi' > /root/.bash_profile
 
+# Install GoTTY binary only - NOT starting it automatically
+RUN wget -q -O /tmp/gotty.tar.gz https://github.com/sorenisanerd/gotty/releases/download/v1.5.0/gotty_v1.5.0_linux_amd64.tar.gz && \
+    tar -zxf /tmp/gotty.tar.gz -C /usr/local/bin && \
+    rm /tmp/gotty.tar.gz && \
+    chmod +x /usr/local/bin/gotty
+
+# Create directories for GoTTY service
+RUN mkdir -p /var/run/gotty /var/log/gotty
+
+COPY gotty-service /usr/local/bin/gotty-service
+RUN chmod +x /usr/local/bin/gotty-service
+
 COPY entrypoint.sh /docker/entrypoint.sh
 
 # Start nginx in foreground (pass CMD to docker entrypoint.sh):
 CMD ["/usr/sbin/nginx", "-g", "daemon off;"]
 
-# Note: If you have not included the "bash" package, then it is "mandatory" to add "/bin/sh"
-#         in the ENTNRYPOINT instruction.
-#       Otherwise you will get strange errors when you try to run the container.
-#       Such as:
-#       standard_init_linux.go:219: exec user process caused: no such file or directory
-
 # Run the startup script as ENTRYPOINT, which does few things and then starts nginx.
 ENTRYPOINT ["/bin/sh", "/docker/entrypoint.sh"]
-
-
-
-
-
-
