@@ -1,0 +1,150 @@
+#!/bin/bash
+
+# GoTTY service management script
+# Usage: gotty-service {start|stop|status|restart} [PORT] [USERNAME] [PASSWORD] [SHELL]
+
+# Default configuration
+PORT=${2:-8080}
+USERNAME=${3:-admin}
+PASSWORD=${4:-admin}
+SHELL=${5:-bash}
+TITLE="Network Multitool Terminal"
+
+# Paths
+PID_FILE="/var/run/gotty/gotty-${PORT}.pid"
+LOG_FILE="/var/log/gotty/gotty-${PORT}.log"
+
+# Ensure directories exist
+mkdir -p /var/run/gotty /var/log/gotty
+
+check_port() {
+    if netstat -tuln | grep -q ":$PORT "; then
+        if [ -f "$PID_FILE" ]; then
+            PID=$(cat "$PID_FILE")
+            if ps -p "$PID" > /dev/null; then
+                # Our GoTTY service is using this port
+                return 0
+            fi
+        fi
+        # Another service is using this port
+        echo "Error: Port $PORT is already in use by another service."
+        return 1
+    fi
+    return 0
+}
+
+start_gotty() {
+    if [ -f "$PID_FILE" ]; then
+        PID=$(cat "$PID_FILE")
+        if ps -p "$PID" > /dev/null; then
+            echo "GoTTY is already running on port $PORT (PID: $PID)"
+            return 0
+        else
+            # Stale PID file
+            rm "$PID_FILE"
+        fi
+    fi
+
+    check_port || return 1
+
+    echo "Starting GoTTY service on port $PORT..."
+    gotty -w -p "$PORT" -c "$USERNAME:$PASSWORD" --title-format "$TITLE" "$SHELL" > "$LOG_FILE" 2>&1 &
+
+    PID=$!
+    echo $PID > "$PID_FILE"
+
+    # Check if process is still running after a short delay
+    sleep 1
+    if ps -p "$PID" > /dev/null; then
+        echo "GoTTY service started successfully (PID: $PID)"
+        echo "Access web terminal at: http://<host-ip>:$PORT"
+        echo "Username: $USERNAME"
+        echo "Password: $PASSWORD"
+        return 0
+    else
+        echo "Failed to start GoTTY service. Check logs at $LOG_FILE"
+        rm -f "$PID_FILE"
+        return 1
+    fi
+}
+
+stop_gotty() {
+    if [ -f "$PID_FILE" ]; then
+        PID=$(cat "$PID_FILE")
+        if ps -p "$PID" > /dev/null; then
+            echo "Stopping GoTTY service on port $PORT (PID: $PID)..."
+            kill "$PID"
+
+            # Wait for process to terminate
+            for i in {1..5}; do
+                if ! ps -p "$PID" > /dev/null; then
+                    break
+                fi
+                sleep 1
+            done
+
+            # Check if process is still running
+            if ps -p "$PID" > /dev/null; then
+                echo "GoTTY service did not stop gracefully, forcing termination..."
+                kill -9 "$PID"
+            fi
+
+            rm -f "$PID_FILE"
+            echo "GoTTY service stopped"
+        else
+            echo "GoTTY service is not running on port $PORT (stale PID file)"
+            rm -f "$PID_FILE"
+        fi
+    else
+        echo "GoTTY service is not running on port $PORT"
+    fi
+}
+
+check_status() {
+    if [ -f "$PID_FILE" ]; then
+        PID=$(cat "$PID_FILE")
+        if ps -p "$PID" > /dev/null; then
+            echo "GoTTY service is running on port $PORT (PID: $PID)"
+            echo "Access web terminal at: http://<host-ip>:$PORT"
+            echo "Username: $USERNAME"
+            echo "Password: $PASSWORD"
+            return 0
+        else
+            echo "GoTTY service is not running on port $PORT (stale PID file)"
+            rm -f "$PID_FILE"
+            return 1
+        fi
+    else
+        echo "GoTTY service is not running on port $PORT"
+        return 1
+    fi
+}
+
+restart_gotty() {
+    stop_gotty
+    sleep 2
+    start_gotty
+}
+
+# Main logic
+case "$1" in
+    start)
+        start_gotty
+        ;;
+    stop)
+        stop_gotty
+        ;;
+    status)
+        check_status
+        ;;
+    restart)
+        restart_gotty
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|status|restart} [PORT] [USERNAME] [PASSWORD] [SHELL]"
+        echo "Default: PORT=8080, USERNAME=admin, PASSWORD=admin, SHELL=bash"
+        exit 1
+        ;;
+esac
+
+exit 0
