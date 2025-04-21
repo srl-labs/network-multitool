@@ -1,3 +1,13 @@
+# Build stage for GoTTY
+FROM golang:alpine AS gotty-builder
+
+# Install git for go install to fetch the repository
+RUN apk add --no-cache git
+
+# Install GoTTY from source
+RUN go install github.com/sorenisanerd/gotty@v1.5.0
+
+# Final stage
 FROM alpine:3.18.6
 
 EXPOSE 22 80 443 1180 11443 8080
@@ -47,11 +57,9 @@ COPY nginx.conf /etc/nginx/nginx.conf
 COPY .bashrc /root/.bashrc
 RUN echo 'if [ -f ~/.bashrc ]; then . ~/.bashrc; fi' > /root/.bash_profile
 
-# Install GoTTY binary only - NOT starting it automatically
-RUN wget -q -O /tmp/gotty.tar.gz https://github.com/sorenisanerd/gotty/releases/download/v1.5.0/gotty_v1.5.0_linux_amd64.tar.gz && \
-    tar -zxf /tmp/gotty.tar.gz -C /usr/local/bin && \
-    rm /tmp/gotty.tar.gz && \
-    chmod +x /usr/local/bin/gotty
+# Copy GoTTY binary from the build stage
+COPY --from=gotty-builder /go/bin/gotty /usr/local/bin/
+RUN chmod +x /usr/local/bin/gotty
 
 # Create directories for GoTTY service
 RUN mkdir -p /var/run/gotty /var/log/gotty
