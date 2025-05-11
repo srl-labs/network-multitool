@@ -1,3 +1,15 @@
+FROM alpine:3.18.6 AS builder
+
+RUN apk update && apk add --virtual .build-deps \
+    build-base gcc
+
+RUN wget https://github.com/troglobit/mcjoin/releases/download/v2.11/mcjoin-2.11.tar.gz
+RUN tar -xzf mcjoin-2.11.tar.gz
+WORKDIR /mcjoin-2.11
+RUN ./configure
+RUN make -j5
+RUN make install-strip
+
 # Build stage for GoTTY
 FROM golang:alpine AS gotty-builder
 
@@ -7,7 +19,7 @@ RUN apk add --no-cache git
 # Install GoTTY from source
 RUN go install github.com/sorenisanerd/gotty@v1.5.0
 
-# Final stage
+# Final image
 FROM alpine:3.18.6
 
 EXPOSE 22 80 443 1180 11443 8080
