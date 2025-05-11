@@ -20,7 +20,7 @@ RUN     apk update \
     iproute2 iputils jq lftp mtr mysql-client net-tools netcat-openbsd \
     nginx nmap openntpd openssh-client openssl perl-net-telnet \
     postgresql-client procps rsync socat sudo tcpdump tcptraceroute \
-    tshark wget envsubst\
+    tshark wget envsubst scapy liboping fping \
     &&  mkdir /certs /docker \
     &&  chmod 700 /certs \
     &&  openssl req \
@@ -31,6 +31,8 @@ RUN wget https://github.com/osrg/gobgp/releases/download/v3.25.0/gobgp_3.25.0_li
 RUN mkdir -p /usr/local/gobgp
 RUN tar -C /usr/local/gobgp -xzf gobgp_3.25.0_linux_amd64.tar.gz
 RUN cp /usr/local/gobgp/gobgp* /usr/bin/
+
+COPY --from=builder /usr/local/bin/mcjoin /usr/local/bin/
 
 RUN rm /etc/motd
 
