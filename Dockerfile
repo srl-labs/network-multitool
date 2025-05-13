@@ -1,7 +1,7 @@
 FROM alpine:3.18.6 AS builder
 
 RUN apk update && apk add --virtual .build-deps \
-    build-base gcc
+    build-base gcc wget
 
 RUN wget https://github.com/troglobit/mcjoin/releases/download/v2.12/mcjoin-2.12.tar.gz
 RUN tar -xzf mcjoin-2.12.tar.gz
