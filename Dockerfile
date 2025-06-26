@@ -83,6 +83,7 @@ COPY gotty-service /usr/local/bin/gotty-service
 RUN chmod +x /usr/local/bin/gotty-service
 
 COPY entrypoint.sh /docker/entrypoint.sh
+COPY if-wait.sh /docker/if-wait.sh
 
 # Start nginx in foreground (pass CMD to docker entrypoint.sh):
 CMD ["/usr/sbin/nginx", "-g", "daemon off;"]

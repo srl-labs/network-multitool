@@ -1,3 +1,7 @@
+#!/bin/sh
+
+sh /docker/if-wait.sh
+
 ifup -a
 #########
 # create directories for ssh host keys
