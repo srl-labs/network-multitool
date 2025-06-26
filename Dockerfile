@@ -59,8 +59,8 @@ COPY .bashrc /home/user/.bashrc
 RUN chown user:user /home/user/.bashrc
 # Ensure .bashrc is sourced by creating a .bash_profile that sources .bashrc
 RUN echo 'if [ -f ~/.bashrc ]; then . ~/.bashrc; fi' > /home/user/.bash_profile
-# Ensure config in /etc/ssh/ssh_config.d/ is included
-RUN echo "Include /etc/ssh/ssh_config.d/*.conf" >> /etc/ssh/ssh_config
+# Ensure configs in /etc/ssh/ssh_config.d/ are included
+RUN echo "Include /etc/ssh/ssh_config.d/*" >> /etc/ssh/ssh_config
 # Change ownership of the home directory to the user
 RUN chown -R user:user /home/user
 ###
