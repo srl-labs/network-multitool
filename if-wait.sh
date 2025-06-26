@@ -48,5 +48,7 @@ if [ "$REQUIRED_INTFS_NUM" -gt 0 ]; then
     fi
 fi
 
-echo "Sleeping $SLEEP seconds before boot"
-sleep $SLEEP
+if [ "$SLEEP" -ne 0 ]; then
+    echo "Sleeping $SLEEP seconds before boot"
+    sleep $SLEEP
+fi
