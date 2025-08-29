@@ -50,19 +50,19 @@ RUN rm /etc/motd
 
 ###
 # set a password to SSH into the docker container with
-RUN adduser -D -h /home/user -s /bin/bash user
-RUN adduser user wheel
+RUN adduser -D -h /home/admin -s /bin/bash admin
+RUN adduser admin wheel
 RUN sed -i 's/# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) NOPASSWD: ALL/g' /etc/sudoers
-RUN echo 'user:multit00l' | chpasswd
-# copy a basic but nicer than standard bashrc for the user
-COPY .bashrc /home/user/.bashrc
-RUN chown user:user /home/user/.bashrc
+RUN echo 'admin:multit00l' | chpasswd
+# copy a basic but nicer than standard bashrc for the user 'admin'
+COPY .bashrc /home/admin/.bashrc
+RUN chown admin:admin /home/admin/.bashrc
 # Ensure .bashrc is sourced by creating a .bash_profile that sources .bashrc
-RUN echo 'if [ -f ~/.bashrc ]; then . ~/.bashrc; fi' > /home/user/.bash_profile
+RUN echo 'if [ -f ~/.bashrc ]; then . ~/.bashrc; fi' > /home/admin/.bash_profile
 # Ensure configs in /etc/ssh/ssh_config.d/ are included
 RUN echo "Include /etc/ssh/ssh_config.d/*" >> /etc/ssh/ssh_config
-# Change ownership of the home directory to the user
-RUN chown -R user:user /home/user
+# Change ownership of the home directory to the user 'admin'
+RUN chown -R admin:admin /home/admin
 ###
 
 COPY index.html /usr/share/nginx/html/
