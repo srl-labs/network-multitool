@@ -75,13 +75,16 @@ RUN mkdir -p /usr/local/gobgp
 RUN tar -C /usr/local/gobgp -xzf gobgp_3.25.0_linux_amd64.tar.gz
 RUN cp /usr/local/gobgp/gobgp* /usr/bin/
 
+# mcjoin binary
 COPY --from=builder /usr/local/bin/mcjoin /usr/local/bin/
+# bngblaster binaries and dependencies
+RUN apk add ncurses openssl jansson
+RUN mkdir /run/lock
 COPY --from=builder /usr/sbin/bngblaster-cli /usr/sbin/
 COPY --from=builder /usr/bin/bgpupdate /usr/bin/
 COPY --from=builder /usr/bin/ldpupdate /usr/bin/
 COPY --from=builder /usr/sbin/bngblaster /usr/sbin/
 COPY --from=builder /usr/sbin/lspgen /usr/sbin/
-RUN mkdir /run/lock
 
 RUN rm /etc/motd
 
