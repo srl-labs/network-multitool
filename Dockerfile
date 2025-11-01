@@ -1,8 +1,39 @@
 FROM alpine:3.18.6 AS builder
 
 RUN apk update && apk add --virtual .build-deps \
-    build-base gcc wget
+    build-base gcc wget cmake cunit-dev libpcap-dev \
+    ncurses-dev openssl-dev jansson-dev numactl-dev \ 
+    libbsd-dev linux-headers
 
+#Install bngblaster from source
+RUN mkdir /bngblaster
+WORKDIR /bngblaster
+RUN wget https://github.com/rtbrick/libdict/archive/refs/tags/1.0.4.zip
+RUN unzip 1.0.4.zip
+RUN mkdir libdict-1.0.4/build
+WORKDIR /bngblaster/libdict-1.0.4/build
+RUN cmake ..
+RUN make -j16 install
+WORKDIR /bngblaster
+RUN wget https://github.com/rtbrick/bngblaster/archive/refs/tags/0.9.26.zip
+RUN unzip 0.9.26.zip
+RUN mkdir bngblaster-0.9.26/build
+WORKDIR /bngblaster/bngblaster-0.9.26/build
+#remove redundant include to avoid preprocessor redirect warning and consequent compilation failure
+RUN sed -i '/#include <sys\/signal.h>/d' ../code/lwip/contrib/ports/unix/port/netif/sio.c
+#typedef for uint to avoid compilation error on alpine musl libc
+RUN sed -i '$i typedef unsigned int uint;' ../code/common/src/common.h
+# add include to support be32toh and htobe32 on alpine musl libc
+RUN sed -i '/#include <stdlib.h>/i #include <endian.h>' ../code/common/src/common.h 
+#replace __time_t with time_t to make it compatible with alpine musl libc
+RUN find /bngblaster/bngblaster-0.9.26/code/ -type f \( -name "*.c" -o -name "*.h" \) -exec sed -i 's/\b__time_t\b/time_t/g' {} +
+#Don't error on sequence-point errors to allow build to complete on musl libc. Ideally code should be fixed on upstream repo.
+RUN sed -i 's/APPEND CMAKE_C_FLAGS "-pthread"/APPEND CMAKE_C_FLAGS "-pthread -Wno-error=sequence-point"/' ../code/bngblaster/CMakeLists.txt
+RUN cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBNGBLASTER_VERSION=0.9.26 ..
+RUN make install
+
+# Install mcjoin from source
+WORKDIR /
 RUN wget https://github.com/troglobit/mcjoin/releases/download/v2.12/mcjoin-2.12.tar.gz
 RUN tar -xzf mcjoin-2.12.tar.gz
 WORKDIR /mcjoin-2.12
@@ -45,6 +76,12 @@ RUN tar -C /usr/local/gobgp -xzf gobgp_3.25.0_linux_amd64.tar.gz
 RUN cp /usr/local/gobgp/gobgp* /usr/bin/
 
 COPY --from=builder /usr/local/bin/mcjoin /usr/local/bin/
+COPY --from=builder /usr/sbin/bngblaster-cli /usr/sbin/
+COPY --from=builder /usr/bin/bgpupdate /usr/bin/
+COPY --from=builder /usr/bin/ldpupdate /usr/bin/
+COPY --from=builder /usr/sbin/bngblaster /usr/sbin/
+COPY --from=builder /usr/sbin/lspgen /usr/sbin/
+RUN mkdir /run/lock
 
 RUN rm /etc/motd
 
