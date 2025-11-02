@@ -6,31 +6,9 @@ RUN apk update && apk add --virtual .build-deps \
     libbsd-dev linux-headers
 
 #Install bngblaster from source
-RUN mkdir /bngblaster
-WORKDIR /bngblaster
-RUN wget https://github.com/rtbrick/libdict/archive/refs/tags/1.0.4.zip
-RUN unzip 1.0.4.zip
-RUN mkdir libdict-1.0.4/build
-WORKDIR /bngblaster/libdict-1.0.4/build
-RUN cmake ..
-RUN make -j16 install
-WORKDIR /bngblaster
-RUN wget https://github.com/rtbrick/bngblaster/archive/refs/tags/0.9.26.zip
-RUN unzip 0.9.26.zip
-RUN mkdir bngblaster-0.9.26/build
-WORKDIR /bngblaster/bngblaster-0.9.26/build
-#remove redundant include to avoid preprocessor redirect warning and consequent compilation failure
-RUN sed -i '/#include <sys\/signal.h>/d' ../code/lwip/contrib/ports/unix/port/netif/sio.c
-#typedef for uint to avoid compilation error on alpine musl libc
-RUN sed -i '$i typedef unsigned int uint;' ../code/common/src/common.h
-# add include to support be32toh and htobe32 on alpine musl libc
-RUN sed -i '/#include <stdlib.h>/i #include <endian.h>' ../code/common/src/common.h 
-#replace __time_t with time_t to make it compatible with alpine musl libc
-RUN find /bngblaster/bngblaster-0.9.26/code/ -type f \( -name "*.c" -o -name "*.h" \) -exec sed -i 's/\b__time_t\b/time_t/g' {} +
-#Don't error on sequence-point errors to allow build to complete on musl libc. Ideally code should be fixed on upstream repo.
-RUN sed -i 's/APPEND CMAKE_C_FLAGS "-pthread"/APPEND CMAKE_C_FLAGS "-pthread -Wno-error=sequence-point"/' ../code/bngblaster/CMakeLists.txt
-RUN cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBNGBLASTER_VERSION=0.9.26 ..
-RUN make install
+COPY install-bngblaster.sh /
+RUN chmod +x /install-bngblaster.sh
+RUN /install-bngblaster.sh
 
 # Install mcjoin from source
 WORKDIR /
