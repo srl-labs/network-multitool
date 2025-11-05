@@ -1,8 +1,17 @@
 FROM alpine:3.18.6 AS builder
 
 RUN apk update && apk add --virtual .build-deps \
-    build-base gcc wget
+    build-base gcc wget cmake cunit-dev libpcap-dev \
+    ncurses-dev openssl-dev jansson-dev numactl-dev \ 
+    libbsd-dev linux-headers
 
+#Install bngblaster from source
+COPY install-bngblaster.sh /
+RUN chmod +x /install-bngblaster.sh
+RUN /install-bngblaster.sh
+
+# Install mcjoin from source
+WORKDIR /
 RUN wget https://github.com/troglobit/mcjoin/releases/download/v2.12/mcjoin-2.12.tar.gz
 RUN tar -xzf mcjoin-2.12.tar.gz
 WORKDIR /mcjoin-2.12
@@ -44,7 +53,16 @@ RUN mkdir -p /usr/local/gobgp
 RUN tar -C /usr/local/gobgp -xzf gobgp_3.25.0_linux_amd64.tar.gz
 RUN cp /usr/local/gobgp/gobgp* /usr/bin/
 
+# mcjoin binary
 COPY --from=builder /usr/local/bin/mcjoin /usr/local/bin/
+# bngblaster binaries and dependencies
+RUN apk add ncurses openssl jansson
+RUN mkdir /run/lock
+COPY --from=builder /usr/sbin/bngblaster-cli /usr/sbin/
+COPY --from=builder /usr/bin/bgpupdate /usr/bin/
+COPY --from=builder /usr/bin/ldpupdate /usr/bin/
+COPY --from=builder /usr/sbin/bngblaster /usr/sbin/
+COPY --from=builder /usr/sbin/lspgen /usr/sbin/
 
 RUN rm /etc/motd
 
