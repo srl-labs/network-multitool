@@ -38,8 +38,8 @@ EXPOSE 22 80 443 1180 11443 8080
 RUN     apk update \
     &&  apk add apache2-utils bash bind-tools busybox-extras bonding curl \
     dnsmasq dropbear ethtool freeradius git go ifupdown-ng iperf iperf3 \
-    iproute2 iputils jq lftp mtr mysql-client net-tools netcat-openbsd \
-    nginx nmap openntpd openssh-client openssl perl-net-telnet \
+    iproute2 iputils jq lftp mtr mysql-client netcat-openbsd net-snmp-tools \
+    net-tools nginx nmap openntpd openssh-client openssl perl-net-telnet \
     postgresql-client procps rsync socat sudo tcpdump tcptraceroute \
     tshark wget envsubst scapy liboping fping bash-completion \
     &&  mkdir /certs /docker \
