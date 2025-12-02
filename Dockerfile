@@ -41,7 +41,7 @@ RUN     apk update \
     iproute2 iputils jq lftp mtr mysql-client netcat-openbsd net-snmp-tools \
     net-tools nginx nmap openntpd openssh-client openssl perl-net-telnet \
     postgresql-client procps rsync socat sudo tcpdump tcptraceroute \
-    tshark wget envsubst scapy liboping fping bash-completion \
+    tshark wget envsubst scapy liboping fping bash-completion openssh-sftp-server \
     &&  mkdir /certs /docker \
     &&  chmod 700 /certs \
     &&  openssl req \
