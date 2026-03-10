@@ -42,6 +42,7 @@ RUN     apk update \
     net-tools nginx nmap openntpd openssh-client openssl perl-net-telnet \
     postgresql-client procps rsync socat sudo tcpdump tcptraceroute \
     tshark wget envsubst scapy liboping fping bash-completion openssh-sftp-server \
+    ppp-pppoe dhcpcd wireguard-tools-wg-quick kea-dhcp4 kea-dhcp6 \
     &&  mkdir /certs /docker \
     &&  chmod 700 /certs \
     &&  openssl req \
