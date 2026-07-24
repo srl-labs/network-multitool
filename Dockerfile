@@ -36,7 +36,7 @@ EXPOSE 22 80 443 1180 11443 8080
 # Install some tools in the container and generate self-signed SSL certificates.
 # Packages are listed in alphabetical order, for ease of readability and ease of maintenance.
 RUN     apk update \
-    &&  apk add apache2-utils bash bind-tools busybox-extras bonding curl \
+    &&  apk add apache2-utils bash bind-tools busybox-extras bonding chrony curl \
     dnsmasq dropbear ethtool freeradius git go ifupdown-ng iperf iperf3 \
     iproute2 iputils jq lftp lldpd mtr mysql-client netcat-openbsd net-snmp-tools \
     net-tools nginx nmap openntpd openssh-client openssl perl-net-telnet \
