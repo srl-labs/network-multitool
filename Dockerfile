@@ -1,4 +1,4 @@
-FROM alpine:3.18.6 AS builder
+FROM alpine:3.24.1 AS builder
 
 RUN apk update && apk add --virtual .build-deps \
     build-base gcc wget cmake cunit-dev libpcap-dev \
@@ -29,7 +29,7 @@ RUN apk add --no-cache git
 RUN go install github.com/sorenisanerd/gotty@v1.5.0
 
 # Final image
-FROM alpine:3.18.6
+FROM alpine:3.24.1
 
 EXPOSE 22 80 443 1180 11443 8080
 
@@ -43,6 +43,7 @@ RUN     apk update \
     postgresql-client procps rsync socat sudo tcpdump tcptraceroute \
     tshark wget envsubst scapy liboping fping bash-completion openssh-sftp-server \
     ppp-pppoe dhcpcd wireguard-tools-wg-quick kea-dhcp4 kea-dhcp6 \
+    tacacs+ng \
     &&  mkdir /certs /docker \
     &&  chmod 700 /certs \
     &&  openssl req \
@@ -58,7 +59,6 @@ RUN cp /usr/local/gobgp/gobgp* /usr/bin/
 COPY --from=builder /usr/local/bin/mcjoin /usr/local/bin/
 # bngblaster binaries and dependencies
 RUN apk add ncurses openssl jansson
-RUN mkdir /run/lock
 COPY --from=builder /usr/sbin/bngblaster-cli /usr/sbin/
 COPY --from=builder /usr/bin/bgpupdate /usr/bin/
 COPY --from=builder /usr/bin/ldpupdate /usr/bin/
