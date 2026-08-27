@@ -43,7 +43,7 @@ RUN     apk update \
     postgresql-client procps rsync socat sudo tcpdump tcptraceroute \
     tshark wget envsubst scapy liboping fping bash-completion openssh-sftp-server \
     ppp-pppoe dhcpcd wireguard-tools-wg-quick kea-dhcp4 kea-dhcp6 \
-    tacacs+ng \
+    tacacs+ng freeradius-utils \
     &&  mkdir /certs /docker \
     &&  chmod 700 /certs \
     &&  openssl req \
