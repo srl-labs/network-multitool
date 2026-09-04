@@ -1,6 +1,6 @@
 #!/bin/sh
 LIBDICT_VERSION="1.0.5"
-BNGBLASTER_VERSION="0.9.31"
+BNGBLASTER_VERSION="0.9.39"
 mkdir /bngblaster
 cd /bngblaster
 wget https://github.com/rtbrick/libdict/archive/refs/tags/$LIBDICT_VERSION.zip
